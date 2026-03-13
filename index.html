@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AncientHouse22NTH</title>
+<style>
+       body { font-family: sans-serif; margin: 0; padding: 15px; background: #f4f4f4; }
+       h2 { color: #2c3e50; border-bottom: 2px solid #e67e22; padding-bottom: 5px; }
+       .menu-item { background: white; padding: 10px; margin-bottom: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+       .price { color: #e67e22; font-weight: bold; }
+       button { background: #27ae60; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; }
+       #history-section { margin-top: 30px; background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #ddd; }
+       .history-item { display: flex; justify-content: space-between; font-size: 0.9em; margin-bottom: 5px; color: #555; }
+       .total { font-size: 1.2em; font-weight: bold; text-align: right; margin-top: 10px; color: #c0392b; }
+       .clear-btn { background: #7f8c8d; font-size: 0.8em; margin-top: 10px; }
+</style>
+</head>
+<body>
+<h2>☕ Coffee Menu </h2>
+<div id="menu-list">
+</div>
+<div id="history-section">
+<h3>📋 Order History</h3>
+<div id="history-list">
+<p style="color:#999">Chưa có món nào được chọn...</p>
+</div>
+<div class="total" id="total-price">Bill Total: 0đ</div>
+<button class="clear-btn" onclick="clearOrder()">Clear Order History / Khách mới</button>
+</div>
+<script>
+       // 1. Dữ liệu Menu
+       const menuData = [
+           { id: 1, name: "Cà phê sữa đá", price: 25000 },
+           { id: 2, name: "Trà sữa Matcha", price: 40000 },
+           { id: 3, name: "Nước ép Cam", price: 35000 },
+           { id: 4, name: "Trà đào cam sả", price: 45000 }
+       ];
+       // 2. Hiển thị Menu ra màn hình
+       const menuDiv = document.getElementById('menu-list');
+       menuData.forEach(item => {
+           menuDiv.innerHTML += `
+<div class="menu-item">
+<div>
+<strong>${item.name}</strong><br>
+<span class="price">${item.price.toLocaleString()}đ</span>
+</div>
+<button onclick="addToOrder(${item.id})">Thêm món</button>
+</div>
+           `;
+       });
+       // 3. Logic xử lý Order
+       let currentOrder = JSON.parse(localStorage.getItem('myOrder')) || [];
+       function addToOrder(id) {
+           const item = menuData.find(m => m.id === id);
+           currentOrder.push({ ...item, time: new Date().toLocaleTimeString() });
+           saveAndRender();
+       }
+       function saveAndRender() {
+           // Lưu vào bộ nhớ trình duyệt
+           localStorage.setItem('myOrder', JSON.stringify(currentOrder));
+           const historyDiv = document.getElementById('history-list');
+           const totalDiv = document.getElementById('total-price');
+           if (currentOrder.length === 0) {
+               historyDiv.innerHTML = '<p style="color:#999">Chưa có món nào...</p>';
+               totalDiv.innerHTML = 'Total: 0đ';
+               return;
+           }
+           let html = '';
+           let total = 0;
+           currentOrder.forEach((item, index) => {
+               html += `
+<div class="history-item">
+<span>${item.name} (${item.time})</span>
+<span>${item.price.toLocaleString()}đ</span>
+</div>
+               `;
+               total += item.price;
+           });
+           historyDiv.innerHTML = html;
+           totalDiv.innerHTML = `Total: ${total.toLocaleString()}đ`;
+       }
+       function clearOrder() {
+           if(confirm("Bạn muốn xóa lịch sử để đón khách mới?")) {
+               currentOrder = [];
+               saveAndRender();
+           }
+       }
+       // Chạy lần đầu khi load trang
+       saveAndRender();
+</script>
+</body>
+</html>
